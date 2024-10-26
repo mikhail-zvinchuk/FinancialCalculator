@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "flask-vuetify-template"
+version = "0.1.0"
+description = "Template that combines flask and vuetify"
+authors = ["Mikhail Zvinchuk <91047014+mikhail-zvinchuk@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "^3.0.3"
+Flask-Cors = "^5.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
