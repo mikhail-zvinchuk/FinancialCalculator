@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-sparkline :fill="fill" :gradient="selectedGradient" :line-width="lineWidth" :model-value="chartData"
+    <v-sparkline :fill="fill" :gradient="selectedGradient" :line-width="lineWidth" :model-value="value"
       :padding="padding" :smooth="smooth" auto-draw></v-sparkline>
 
     <v-divider></v-divider>
@@ -26,29 +26,36 @@
     </v-row>
 
     <v-row class="mt-5">
-      <v-col cols="2">Filled</v-col>
+      <v-col cols="2">
+        Filled
+      </v-col>
       <v-col cols="3">
         <v-switch v-model="fill" class="switch"></v-switch>
       </v-col>
-      <v-col cols="3">Line width</v-col>
+      <v-col cols="3">
+        Line width
+      </v-col>
       <v-col cols="3">
         <v-slider v-model="lineWidth" max="10" min="0.1" step="0.1" thumb-label></v-slider>
       </v-col>
     </v-row>
 
     <v-row>
-      <v-col cols="2">Smooth</v-col>
+      <v-col cols="2">
+        Smooth
+      </v-col>
       <v-col cols="3">
         <v-switch v-model="smooth" class="switch"></v-switch>
       </v-col>
-      <v-col cols="3">Padding</v-col>
+      <v-col cols="3">
+        Padding
+      </v-col>
       <v-col cols="3">
         <v-slider v-model="padding" cols="3" max="25" min="0" thumb-label></v-slider>
       </v-col>
     </v-row>
   </v-container>
 </template>
-
 <script>
 import axios from 'axios';
 
@@ -59,7 +66,7 @@ const gradients = [
   ['purple', 'violet'],
   ['#00c6ff', '#F0F', '#FF0'],
   ['#f72047', '#ffd200', '#1feaea'],
-];
+]
 
 export default {
   data: () => ({
@@ -68,28 +75,19 @@ export default {
     gradients,
     padding: 8,
     smooth: true,
-    chartData: [1, 2, 3, 4, 5],
+    value: [1, 2, 3, 4, 5],
     lineWidth: 2,
   }),
 
   mounted() {
-    this.fetchData();
-  },
+    fetch('/data')
+      .then(res => res.json())
+      .then(data => this.value = data.value)
+      .catch(err => console.log(err.message))
+  }
 
-  methods: {
-    async fetchData() {
-      try {
-        const response = await axios.get('/data');
-        this.chartData = response.data;
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        // Handle error (e.g., show error message to user)
-      }
-    },
-  },
 }
 </script>
-
 <style scoped>
 .switch {
   position: relative;
