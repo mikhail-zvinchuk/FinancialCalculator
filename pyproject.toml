@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "flask-vuetify-template"
+name = "FinancialCalculator"
 version = "0.1.0"
-description = "Template that combines flask and vuetify"
+description = "POC of financial calulator"
 authors = ["Mikhail Zvinchuk <91047014+mikhail-zvinchuk@users.noreply.github.com>"]
 readme = "README.md"
 

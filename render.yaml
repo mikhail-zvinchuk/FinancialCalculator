@@ -1,0 +1,11 @@
+# Exported from Render on 2024-10-27T18:13:09Z
+services:
+- type: web
+  name: FinancialCalculator
+  runtime: python
+  repo: https://github.com/mikhail-zvinchuk/FinancialCalculator
+  plan: free
+  region: frankfurt
+  buildCommand: ./build.sh
+  startCommand: flask run  --host=0.0.0.0 --port 80
+version: "1"
