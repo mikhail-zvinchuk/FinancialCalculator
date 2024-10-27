@@ -1,6 +1,7 @@
 <script setup>
 import SideBar from "./components/SideBar.vue"
 import TopBar from "./components/TopBar.vue"
+import ChartComponent from "./components/ChartComponent.vue"
 </script>
 
 <template>
@@ -10,7 +11,7 @@ import TopBar from "./components/TopBar.vue"
 
 
       <v-main class="d-flex align-center justify-center" style="min-height: 300px;">
-        Main Content
+        <ChartComponent />
       </v-main>
     </v-layout>
   </VApp>
