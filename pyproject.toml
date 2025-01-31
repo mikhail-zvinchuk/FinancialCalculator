@@ -4,11 +4,14 @@ version = "0.1.0"
 description = "POC of financial calulator"
 authors = ["Mikhail Zvinchuk <91047014+mikhail-zvinchuk@users.noreply.github.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
 Flask = "^3.0.3"
 Flask-Cors = "^5.0.0"
+openapi-python-client = "^0.23.1"
+openapi-client = {path = "backclient"}
 
 
 [build-system]

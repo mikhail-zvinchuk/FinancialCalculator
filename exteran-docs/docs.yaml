@@ -1,0 +1,152 @@
+openapi: 3.1.0
+info:
+  title: iwantahouseandretire
+  version: 1.0.0
+paths:
+  /:
+    get:
+      operationId: get
+      responses:
+        '200':
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+  /hello:
+    get:
+      operationId: getHello
+      parameters:
+      - name: name
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+        '400':
+          description: 'Invalid value for: query parameter name'
+          content:
+            text/plain:
+              schema:
+                type: string
+  /mortgageToInvestment:
+    post:
+      operationId: postMortgagetoinvestment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MortgageToInvestmentRelation'
+        required: true
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MortgageToInvestmentRelation1'
+        '400':
+          description: 'Invalid value for: body'
+          content:
+            text/plain:
+              schema:
+                type: string
+  /health:
+    get:
+      operationId: getHealth
+      responses:
+        '200':
+          description: ''
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    InvestmentCurve:
+      title: InvestmentCurve
+      type: object
+      required:
+      - initialSum
+      - investmentRate
+      - returnRate
+      properties:
+        initialSum:
+          type: number
+          format: double
+        investmentRate:
+          type: number
+          format: double
+        returnRate:
+          type: number
+          format: double
+    MortgageToInvestmentRelation:
+      title: MortgageToInvestmentRelation
+      type: object
+      required:
+      - investmentInput
+      - mortgageInput
+      properties:
+        investmentInput:
+          $ref: '#/components/schemas/InvestmentCurve'
+        mortgageInput:
+          $ref: '#/components/schemas/RealEstateMortgageGrowth'
+        purchaseX:
+          type: integer
+          format: int32
+    MortgageToInvestmentRelation1:
+      title: MortgageToInvestmentRelation
+      type: object
+      properties:
+        graphs:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlotMetadata'
+    PlotMetadata:
+      title: PlotMetadata
+      type: object
+      required:
+      - identifier
+      properties:
+        identifier:
+          type: string
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/Point'
+    Point:
+      title: Point
+      type: object
+      required:
+      - x
+      - y
+      properties:
+        x:
+          type: number
+          format: double
+        y:
+          type: number
+          format: double
+    RealEstateMortgageGrowth:
+      title: RealEstateMortgageGrowth
+      type: object
+      required:
+      - initialPrice
+      - growthRate
+      - downPaymentPercentage
+      properties:
+        initialPrice:
+          type: number
+          format: double
+        growthRate:
+          type: number
+          format: double
+        downPaymentPercentage:
+          type: number
+          format: double

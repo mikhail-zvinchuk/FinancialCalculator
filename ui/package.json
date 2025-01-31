@@ -9,10 +9,13 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
+    "apexcharts": "^4.4.0",
     "axios": "^1.7.7",
+    "bun": "^1.2.1",
     "core-js": "^3.37.1",
     "roboto-fontface": "*",
     "vue": "^3.4.31",
+    "vue3-apexcharts": "^1.8.0",
     "vuetify": "^3.6.11"
   },
   "devDependencies": {
