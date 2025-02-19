@@ -4,19 +4,25 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
-import axios from 'axios'
+import { useChartDataStore } from '../stores/chartData'
+import { storeToRefs } from 'pinia'
+import type { ApexOptions } from 'apexcharts'
 
-export default {
+export default defineComponent({
   name: 'LineChartWithAnnotations',
   components: {
     apexchart: VueApexCharts,
   },
+  setup() {
+    const store = useChartDataStore()
+    const { series, dataLoaded, error } = storeToRefs(store)
+    return { store, series, dataLoaded, error }
+  },
   data() {
     return {
-      dataLoaded: false,
-      series: [],
       chartOptions: {
         chart: {
           height: "50%",
@@ -130,27 +136,12 @@ export default {
         xaxis: {
           type: 'datetime',
         },
-      },
+      } as ApexOptions,
     }
   },
   mounted() {
-    this.fetchData()
+    this.store.fetchChartData()
   },
-  methods: {
-    async fetchData() {
-      try {
-        const response = await axios.get('/data')
-        console.info(response)
-        const data = response.data
-        this.series = [{
-          data: data.series
-        }]
-        //this.chartOptions.labels = data.labels
-        this.dataLoaded = true
-      } catch (error) {
-        console.error('Error fetching data:', error)
-      }
-    }
-  }
-}
+  methods: {}
+})
 </script>
