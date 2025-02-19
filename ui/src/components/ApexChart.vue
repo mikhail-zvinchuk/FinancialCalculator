@@ -1,147 +1,236 @@
 <template>
-  <div id="chart" class="d-flex flex-column flex-nowrap"  style="width: 50%; height: 50%;">
-    <apexchart type="scatter" class="flex-1-1-100" :options="chartOptions" :series="series"></apexchart>
-  </div>
+  <v-layout>
+    <v-navigation-drawer
+      location="left"
+      permanent
+      width="400"
+      class="parameters-drawer"
+    >
+      <v-card flat class="h-100">
+        <v-card-title class="text-h6 py-4 bg-grey-darken-3 text-white">
+          Parameters
+        </v-card-title>
+        <v-card-text class="pa-4">
+          <ChartParametersForm @update-params="updateChart" />
+        </v-card-text>
+      </v-card>
+    </v-navigation-drawer>
+
+    <v-main>
+      <v-container fluid class="pa-6">
+        <v-card class="h-100">
+          <v-card-text>
+            <div v-if="error" class="error-message mb-4">
+              <v-alert type="error" :text="error" />
+            </div>
+
+            <div v-if="isLoading" class="d-flex justify-center align-center" style="height: 400px;">
+              <v-progress-circular indeterminate color="primary" size="64" />
+            </div>
+
+            <div v-if="hasValidData" id="chart">
+              <apexchart
+                ref="chartRef"
+                type="scatter"
+                height="500"
+                :options="chartOptions"
+                :series="series"
+              />
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-container>
+    </v-main>
+  </v-layout>
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import VueApexCharts from 'vue3-apexcharts'
-import { useChartDataStore } from '../stores/chartData'
+import { useChartDataStore } from '@/stores/chartData'
 import { storeToRefs } from 'pinia'
 import type { ApexOptions } from 'apexcharts'
+import type { MortgageToInvestmentRequest } from '@/stores/chartData'
+import ChartParametersForm from './ChartParametersForm.vue'
 
-export default defineComponent({
-  name: 'LineChartWithAnnotations',
-  components: {
-    apexchart: VueApexCharts,
-  },
-  setup() {
-    const store = useChartDataStore()
-    const { series, dataLoaded, error } = storeToRefs(store)
-    return { store, series, dataLoaded, error }
-  },
-  data() {
-    return {
-      chartOptions: {
-        chart: {
-          height: "50%",
-          width: "50%",
-          type: 'line',
-          id: 'areachart-2'
-        },
-        annotations: {
-          yaxis: [{
-            y: 8200,
-            borderColor: '#00E396',
-            label: {
-              borderColor: '#00E396',
-              style: {
-                color: '#fff',
-                background: '#00E396',
-              },
-              text: 'Support',
-            }
-          }, {
-            y: 8600,
-            y2: 9000,
-            borderColor: '#000',
-            fillColor: '#FEB019',
-            opacity: 0.2,
-            label: {
-              borderColor: '#333',
-              style: {
-                fontSize: '10px',
-                color: '#333',
-                background: '#FEB019',
-              },
-              text: 'Y-axis range',
-            }
-          }],
-          xaxis: [{
-            x: new Date('23 Nov 2017').getTime(),
-            strokeDashArray: 0,
-            borderColor: '#775DD0',
-            label: {
-              borderColor: '#775DD0',
-              style: {
-                color: '#fff',
-                background: '#775DD0',
-              },
-              text: 'Anno Test',
-            }
-          }, {
-            x: new Date('26 Nov 2017').getTime(),
-            x2: new Date('28 Nov 2017').getTime(),
-            fillColor: '#B3F7CA',
-            opacity: 0.4,
-            label: {
-              borderColor: '#B3F7CA',
-              style: {
-                fontSize: '10px',
-                color: '#fff',
-                background: '#00E396',
-              },
-              offsetY: -10,
-              text: 'X-axis range',
-            }
-          }],
-          points: [{
-            x: new Date('01 Dec 2017').getTime(),
-            y: 8607.55,
-            marker: {
-              size: 8,
-              fillColor: '#fff',
-              strokeColor: 'red',
-              radius: 2,
-              cssClass: 'apexcharts-custom-class'
-            },
-            label: {
-              borderColor: '#FF4560',
-              offsetY: 0,
-              style: {
-                color: '#fff',
-                background: '#FF4560',
-              },
-              text: 'Point Annotation',
-            }
-          }, {
-            x: new Date('08 Dec 2017').getTime(),
-            y: 9340.85,
-            marker: {
-              size: 0
-            },
-            image: {
-              path: '../../assets/images/ico-instagram.png'
-            }
-          }]
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'straight'
-        },
-        grid: {
-          padding: {
-            right: 30,
-            left: 20
-          }
-        },
-        title: {
-          text: 'Line with Annotations',
-          align: 'left'
-        },
-        labels: [],
-        xaxis: {
-          type: 'datetime',
-        },
-      } as ApexOptions,
+const store = useChartDataStore()
+const { series, dataLoaded, error } = storeToRefs(store)
+const isLoading = computed(() => store.isLoading)
+const hasValidData = computed(() => dataLoaded.value && series.value.length > 0)
+const chartRef = ref(null)
+
+const updateChart = async (params: MortgageToInvestmentRequest) => {
+  if (!params?.investmentInput?.initialSum ||
+      !params?.investmentInput?.investmentRate ||
+      !params?.investmentInput?.returnRate ||
+      !params?.mortgageInput?.initialPrice ||
+      !params?.mortgageInput?.growthRate ||
+      !params?.mortgageInput?.downPaymentPercentage) {
+    store.error = "Invalid parameters provided"
+    return
+  }
+
+  try {
+    await store.fetchChartData(params)
+  } catch (err) {
+    store.error = err instanceof Error ? err.message : 'Failed to update chart'
+  }
+}
+
+// Load initial data
+onMounted(async () => {
+  try {
+    await store.fetchInitialData()
+  } catch (err) {
+    store.error = err instanceof Error ? err.message : 'Failed to load initial data'
+  }
+})
+
+// Register components
+const components = {
+  apexchart: VueApexCharts,
+  ChartParametersForm
+}
+
+// Chart options using ref for reactivity
+const chartOptions = ref<ApexOptions>({
+  chart: {
+    type: 'scatter',
+    id: 'investment-mortgage-chart',
+    toolbar: {
+      show: true,
+      tools: {
+        download: true,
+        selection: true,
+        zoom: true,
+        zoomin: true,
+        zoomout: true,
+        pan: true,
+        reset: true
+      },
+      autoSelected: 'zoom'
+    },
+    zoom: {
+      enabled: true,
+      type: 'xy',
+      autoScaleYaxis: true
     }
   },
-  mounted() {
-    this.store.fetchChartData()
+  markers: {
+    size: 6,
+    strokeWidth: 1,
+    hover: {
+      size: 8
+    }
   },
-  methods: {}
+  dataLabels: {
+    enabled: false
+  },
+  grid: {
+    xaxis: {
+      lines: {
+        show: true
+      }
+    },
+    yaxis: {
+      lines: {
+        show: true
+      }
+    }
+  },
+  colors: ['#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0'],
+  title: {
+    text: 'Property Value Over Time',
+    align: 'left',
+    style: {
+      fontSize: '18px',
+      fontWeight: 600
+    }
+  },
+  xaxis: {
+    type: 'numeric',
+    title: {
+      text: 'Years',
+      style: {
+        fontSize: '14px',
+        fontWeight: 500
+      }
+    },
+    labels: {
+      formatter: (value: string) => `Year ${Math.round(Number(value))}`,
+      style: {
+        fontSize: '12px'
+      }
+    },
+    min: 0,
+    max: 20,
+    tickAmount: 10
+  },
+  yaxis: [{
+    title: {
+      text: 'Property Value ($)',
+      style: {
+        fontSize: '14px',
+        fontWeight: 500
+      }
+    },
+    labels: {
+      formatter: (value: number) => `$${value.toLocaleString()}`,
+      style: {
+        fontSize: '12px'
+      }
+    },
+    min: 450000,
+    max: 550000,
+    tickAmount: 8,
+    forceNiceScale: true
+  }],
+  tooltip: {
+    shared: false,
+    intersect: true,
+    x: {
+      show: true,
+      formatter: (value: number) => `Year ${Math.round(value)}`
+    },
+    y: {
+      formatter: (value: number) => `$${value.toLocaleString()}`
+    }
+  }
 })
 </script>
+
+<style scoped>
+.error-message {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.h-100 {
+  height: 100%;
+}
+
+.v-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.v-card-text {
+  flex: 1;
+  overflow: auto;
+}
+
+.parameters-drawer {
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.parameters-drawer :deep(.v-navigation-drawer__content) {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#chart {
+  padding: 1rem;
+  min-height: 400px;
+}
+</style>

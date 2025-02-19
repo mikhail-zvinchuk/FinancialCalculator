@@ -28,12 +28,13 @@ function Start-FlaskBackend {
     # Set Flask environment variables
     $env:FLASK_APP = "app.py"
     $env:FLASK_DEBUG = "1"
+    $env:PYTHONUNBUFFERED = "1"  # Ensure Python output is not buffered
     
-    # Start Flask in a new window
+    # Start Flask in a new window with debug mode enabled
     Start-Process powershell -ArgumentList "-NoExit", "-Command", {
         .\.venv\Scripts\Activate
         Write-Host "Starting Flask server..." -ForegroundColor Green
-        flask run
+        python -u app.py  # -u flag ensures unbuffered output
     }
 }
 
